@@ -1,0 +1,14 @@
+{
+  "name": "globaledu-mca-project",
+  "version": "1.0.0",
+  "description": "GlobalEdu - Universal Academic Resource Sharing Platform",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.6",
+    "express": "^4.22.1",
+    "sqlite3": "^5.1.7"
+  }
+}

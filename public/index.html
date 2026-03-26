@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GlobalEdu | Universal Knowledge Hub</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: sans-serif; background-color: #f8fafc; color: #0f172a; }
+        .brand-gradient { background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%); }
+        .glass-panel { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
+        .custom-scroll::-webkit-scrollbar { width: 6px; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+    </style>
+</head>
+<body class="h-screen w-full overflow-hidden flex">
+
+    <div id="authScreen" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-100">
+        <div class="bg-white p-10 rounded-3xl shadow-2xl w-full max-w-md border border-slate-100">
+            <div class="text-center mb-8">
+                <h1 class="text-3xl font-extrabold text-transparent bg-clip-text brand-gradient">GlobalEdu</h1>
+                <p class="text-sm text-slate-500 mt-2">Universal Academic Hub</p>
+            </div>
+            
+            <form id="loginForm" class="space-y-4">
+                <h2 class="text-xl font-bold mb-4">Sign In</h2>
+                <input type="email" placeholder="Email Address" required class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500">
+                <input type="password" placeholder="Password" required class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500">
+                <button type="submit" class="w-full py-3 brand-gradient text-white font-bold rounded-xl shadow-lg">Login</button>
+                <div class="flex justify-between text-sm mt-4">
+                    <a href="#" onclick="switchAuthView('forgot')" class="text-slate-500 hover:text-blue-600">Forgot Password?</a>
+                    <a href="#" onclick="switchAuthView('register')" class="text-blue-600 font-bold hover:underline">New? Register</a>
+                </div>
+            </form>
+
+            <form id="registerForm" class="space-y-4 hidden">
+                <h2 class="text-xl font-bold mb-4">Create Account</h2>
+                <input type="text" id="regName" placeholder="Full Name" required class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none">
+                <input type="email" placeholder="Email Address" required class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none">
+                <input type="password" id="regPass" placeholder="Create Password" required class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none">
+                <input type="password" id="regPassConfirm" placeholder="Confirm Password" required class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none">
+                <button type="submit" class="w-full py-3 brand-gradient text-white font-bold rounded-xl shadow-lg">Register</button>
+                <p class="text-center text-sm text-slate-500 mt-4"><a href="#" onclick="switchAuthView('login')" class="text-blue-600 font-bold hover:underline">Back to Login</a></p>
+            </form>
+
+            <form id="forgotForm" class="space-y-4 hidden">
+                <h2 class="text-xl font-bold mb-4">Reset Password</h2>
+                <p class="text-xs text-slate-500 mb-4">Enter your email to receive a verification code.</p>
+                <input type="email" placeholder="Email Address" required class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none">
+                <div id="verifySection" class="hidden space-y-4">
+                    <input type="text" placeholder="Enter 6-digit Code" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none">
+                    <input type="password" placeholder="New Password" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none">
+                    <button type="button" onclick="alert('Password Reset Successful!'); switchAuthView('login')" class="w-full py-3 bg-green-600 text-white font-bold rounded-xl shadow-lg">Confirm Reset</button>
+                </div>
+                <button type="button" onclick="document.getElementById('verifySection').classList.remove('hidden'); this.classList.add('hidden');" class="w-full py-3 bg-slate-800 text-white font-bold rounded-xl shadow-lg">Send Verification Code</button>
+                <p class="text-center text-sm text-slate-500 mt-4"><a href="#" onclick="switchAuthView('login')" class="text-blue-600 font-bold hover:underline">Back to Login</a></p>
+            </form>
+        </div>
+    </div>
+
+    <div id="appScreen" class="hidden w-full h-full flex">
+        
+        <aside class="w-72 bg-white border-r border-slate-200 flex flex-col z-20 h-full shadow-sm">
+            <div class="p-6 border-b border-slate-100">
+                <h1 class="text-2xl font-extrabold text-transparent bg-clip-text brand-gradient tracking-tight">GlobalEdu</h1>
+            </div>
+
+            <nav class="flex-1 overflow-y-auto custom-scroll p-4 space-y-1">
+                <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 px-2">Menu</p>
+                <button onclick="navigate('Feed')" class="w-full flex items-center gap-3 px-4 py-2 text-slate-700 font-medium hover:bg-slate-50 rounded-xl">🏠 Global Feed</button>
+                <button onclick="navigate('Recommended')" class="w-full flex items-center gap-3 px-4 py-2 text-slate-700 font-medium hover:bg-slate-50 rounded-xl">✨ Recommended</button>
+                <button onclick="navigate('Recent')" class="w-full flex items-center gap-3 px-4 py-2 text-slate-700 font-medium hover:bg-slate-50 rounded-xl">🕒 Recently Visited</button>
+                <button onclick="navigate('MyUploads')" class="w-full flex items-center gap-3 px-4 py-2 text-slate-700 font-medium hover:bg-slate-50 rounded-xl">📁 My Uploads</button>
+                
+                <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 mt-6 px-2">Pinned Items 📌</p>
+                <div id="pinnedList" class="px-2 space-y-1"></div>
+
+                <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 mt-6 px-2 flex justify-between items-center">
+                    Subjects
+                    <button onclick="openModal('addCategoryModal')" class="text-blue-600 font-bold text-xl hover:text-blue-800" title="Add Subject">+</button>
+                </p>
+                <div id="categorySidebarList" class="space-y-1"></div>
+            </nav>
+
+            <div class="p-6 border-t border-slate-100 bg-slate-50">
+                <div class="mb-4">
+                    <div class="flex justify-between text-xs font-bold mb-1">
+                        <span class="text-slate-600">Storage (Free Tier)</span>
+                        <span class="text-blue-600" id="storageText">12MB / 1GB</span>
+                    </div>
+                    <div class="w-full bg-slate-200 rounded-full h-2 mb-2">
+                        <div class="brand-gradient h-2 rounded-full" id="storageBar" style="width: 1.2%;"></div>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3 pt-3 border-t border-slate-200 cursor-pointer hover:bg-slate-200 p-2 rounded-xl transition" onclick="openModal('profileModal')">
+                    <div class="w-10 h-10 rounded-full brand-gradient flex items-center justify-center text-white font-bold" id="userAvatar">U</div>
+                    <div class="flex-1 overflow-hidden">
+                        <p class="text-sm font-bold truncate" id="userNameDisplay">User Name</p>
+                        <p class="text-xs text-slate-500 font-medium">Edit Profile ⚙️</p>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <main class="flex-1 flex flex-col h-full relative overflow-hidden">
+            <header class="glass-panel border-b border-slate-200 px-8 py-5 flex flex-col md:flex-row gap-4 items-center justify-between z-10 relative">
+                <div class="flex-1 flex flex-wrap items-center gap-3 w-full">
+                    <input type="text" id="searchInput" oninput="applyFilters()" placeholder="Search title, subject, or author..." class="w-full md:max-w-sm pl-4 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500 shadow-sm">
+                    <select id="filterType" onchange="applyFilters()" class="px-3 py-2.5 bg-white border border-slate-200 rounded-xl text-sm outline-none shadow-sm cursor-pointer"></select>
+                </div>
+                <button onclick="openModal('uploadModal')" class="brand-gradient text-white px-6 py-2.5 rounded-xl font-bold shadow-md whitespace-nowrap">
+                    + Upload Resource
+                </button>
+            </header>
+
+            <div class="flex-1 overflow-y-auto custom-scroll p-8 bg-slate-50/50">
+                <div class="flex justify-between items-end mb-6">
+                    <div>
+                        <h2 class="text-3xl font-black text-slate-800 tracking-tight" id="pageTitle">Global Feed</h2>
+                        <p class="text-slate-500 text-sm mt-1 font-medium" id="pageSubtitle">Discover resources from all disciplines.</p>
+                    </div>
+                    <span class="text-xs font-bold text-blue-700 bg-blue-100 border border-blue-200 px-3 py-1 rounded-full shadow-sm" id="resultCount">0 items</span>
+                </div>
+                <div id="resourceGrid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 pb-10"></div>
+            </div>
+        </main>
+    </div>
+
+    <div id="uploadModal" class="fixed inset-0 bg-slate-900/60 hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl w-full max-w-2xl p-8 shadow-2xl max-h-[90vh] overflow-y-auto custom-scroll">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-extrabold text-slate-800">Upload New Resource</h2>
+                <button onclick="closeModal('uploadModal')" class="text-slate-400 hover:text-red-500 text-3xl font-bold">&times;</button>
+            </div>
+            <form id="uploadResourceForm" class="space-y-5">
+                <input type="text" id="upTitle" placeholder="Resource Title" required class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-blue-500">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <select id="upCategory" required class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none" onchange="updateSubCats()"></select>
+                    <select id="upSubCategory" required class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none"></select>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <select id="upType" required class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none"></select>
+                    <select id="upVisibility" required class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none">
+                        <option value="public">🌍 Public (Visible to all)</option>
+                        <option value="private">🔒 Private (Only me)</option>
+                    </select>
+                </div>
+                <div class="border-2 border-dashed border-slate-300 rounded-2xl p-10 text-center bg-slate-50 cursor-pointer hover:bg-slate-100 transition">
+                    <p class="text-slate-600 font-bold">Click to browse or drag file here</p>
+                    <p class="text-xs text-slate-400 mt-1">Max size: 100MB (PDF, MP4, DOCX)</p>
+                </div>
+                <button type="submit" class="w-full py-4 brand-gradient text-white font-bold rounded-xl shadow-lg mt-4 text-lg">Publish Resource</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="profileModal" class="fixed inset-0 bg-slate-900/60 hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl w-full max-w-md p-8 shadow-2xl">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-extrabold text-slate-800">Profile Settings</h2>
+                <button onclick="closeModal('profileModal')" class="text-slate-400 hover:text-red-500 text-3xl font-bold">&times;</button>
+            </div>
+            <form id="profileForm" class="space-y-4">
+                <input type="text" id="profName" placeholder="Full Name" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none">
+                <input type="email" id="profEmail" placeholder="Email Address" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none">
+                <input type="tel" id="profPhone" placeholder="Mobile Number" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none">
+                <div class="pt-4 flex gap-3">
+                    <button type="submit" class="flex-1 py-3 bg-slate-800 text-white font-bold rounded-xl">Save Changes</button>
+                    <button type="button" onclick="logout()" class="px-6 py-3 bg-red-50 text-red-600 font-bold rounded-xl border border-red-100">Sign Out</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="detailModal" class="fixed inset-0 bg-slate-900/60 hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl w-full max-w-5xl h-[85vh] shadow-2xl flex flex-col md:flex-row overflow-hidden">
+            <div class="flex-1 p-8 bg-slate-50 overflow-y-auto custom-scroll border-r border-slate-200 flex flex-col">
+                <div class="flex justify-between items-start mb-4">
+                    <span class="px-3 py-1 bg-white border border-slate-200 text-slate-600 rounded-lg text-xs font-bold uppercase" id="detType">Type</span>
+                    <div class="flex gap-2">
+                        <button onclick="togglePinResource()" id="pinResBtn" class="px-3 py-1.5 bg-white border border-slate-200 rounded-lg shadow-sm text-sm font-bold">📌 Pin</button>
+                        <button onclick="deleteCurrentResource()" id="detDeleteBtn" class="px-3 py-1.5 bg-red-50 border border-red-100 rounded-lg shadow-sm text-red-600 text-sm font-bold hidden">🗑️ Delete</button>
+                        <button onclick="closeModal('detailModal')" class="md:hidden text-3xl leading-none text-slate-400">&times;</button>
+                    </div>
+                </div>
+                <h2 id="detTitle" class="text-3xl font-black text-slate-900 mb-2">Title</h2>
+                <p id="detCategory" class="text-sm font-bold text-blue-600 mb-6 flex items-center gap-2"><span id="detCatIcon">📌</span> <span id="detCatText">Category</span></p>
+                
+                <div class="flex items-center gap-3 mb-6 pb-6 border-b border-slate-200">
+                    <div class="w-10 h-10 rounded-full bg-slate-300 flex items-center justify-center font-bold text-slate-700" id="detAuthorAvatar">A</div>
+                    <div>
+                        <p class="text-sm font-bold text-slate-800" id="detAuthor">Author Name</p>
+                        <p class="text-xs text-slate-500" id="detDate">Uploaded Date</p>
+                    </div>
+                </div>
+                
+                <div class="flex-1 bg-white border border-slate-200 rounded-2xl flex flex-col items-center justify-center min-h-[200px] shadow-sm">
+                    <span class="text-6xl mb-4 text-slate-300">📄</span>
+                    <button class="px-6 py-3 brand-gradient text-white font-bold rounded-xl shadow-lg">Download File</button>
+                </div>
+            </div>
+            
+            <div class="w-full md:w-96 flex flex-col h-full bg-white relative">
+                <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-white z-10">
+                    <h3 class="text-lg font-black text-slate-800">Doubts & Discussion</h3>
+                    <button onclick="closeModal('detailModal')" class="hidden md:block text-slate-400 text-3xl hover:text-red-500">&times;</button>
+                </div>
+                <div id="commentList" class="flex-1 p-6 overflow-y-auto custom-scroll space-y-4 bg-slate-50/50"></div>
+                <div class="p-4 border-t border-slate-100 bg-white z-10">
+                    <form id="commentForm" class="flex gap-2">
+                        <input type="text" id="commentInput" required placeholder="Ask a question..." class="flex-1 p-3 bg-slate-100 rounded-xl outline-none text-sm">
+                        <button type="submit" class="px-5 bg-blue-600 text-white rounded-xl text-sm font-bold shadow-md hover:bg-blue-700">Post</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="addCategoryModal" class="fixed inset-0 bg-slate-900/60 hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl w-full max-w-sm p-8 shadow-2xl">
+            <h3 class="text-xl font-extrabold text-slate-800 mb-6">Add Custom Subject</h3>
+            <form id="addCatForm" class="space-y-4">
+                <input type="text" id="newCatName" required placeholder="Subject Name" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none">
+                <div class="pt-2 flex gap-3">
+                    <button type="button" onclick="closeModal('addCategoryModal')" class="flex-1 py-3 bg-slate-100 text-slate-700 font-bold rounded-xl">Cancel</button>
+                    <button type="submit" class="flex-1 py-3 bg-blue-600 text-white font-bold rounded-xl shadow-md">Add</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:3000/api';
+        
+        // State
+        let currentUser = null;
+        let currentActiveView = 'Feed';
+        let currentDetailId = null;
+        let resources = [];
+        let pinnedItems = { resources: [], categories: [] };
+        let recentlyVisited = [];
+
+        // Data Definitions
+        const categoryIcons = { "Natural Sciences": "🔬", "Applied Sciences & Eng": "⚙️", "Medical & Health Sciences": "⚕️", "Social Sciences": "🌍", "Arts & Humanities": "🎨", "Commerce & Management": "📊", "Law & Governance": "⚖️", "Technology & Emerging Fields": "🚀", "Interdisciplinary Studies": "🔗", "Everyday Life & Practical Knowledge": "💡" };
+        let categories = { "Natural Sciences": ["Physics", "Chemistry", "Biology", "Earth Sciences"], "Applied Sciences & Eng": ["Computer Science", "Mechanical Engineering", "Civil Engineering", "Electrical Engineering", "Chemical Engineering"], "Medical & Health Sciences": ["Medicine", "Nursing", "Pharmacy", "Public Health"], "Social Sciences": ["Psychology", "Sociology", "Economics", "Political Science", "Anthropology"], "Arts & Humanities": ["Literature", "History", "Philosophy", "Languages", "Fine Arts"], "Commerce & Management": ["Accounting", "Business", "Finance", "Entrepreneurship"], "Law & Governance": ["Constitutional Law", "Criminal Law", "Corporate Law", "International Law", "Intellectual Property"], "Technology & Emerging Fields": ["Artificial Intelligence", "Data Science", "Cybersecurity", "Environmental Tech", "Space Tech"], "Interdisciplinary Studies": ["Environmental Studies", "Education", "Media & Communication", "Urban Studies"], "Everyday Life & Practical Knowledge": ["Culinary Arts", "Sports", "Travel", "Lifestyle"] };
+        const resourceTypes = ["Lecture Notes", "Textbooks & PDFs", "Research Papers", "Practice Questions", "Lab Manuals", "Presentations (PPTs)", "Recorded Lectures / Tutorials", "Cheat Sheets / Summaries", "Diagrams & Charts", "External Links"];
+
+        // Init
+        window.onload = () => {
+            populateSelect('upCategory', Object.keys(categories));
+            populateSelect('upType', resourceTypes);
+            populateSelect('filterType', resourceTypes, "All File Types");
+            updateSubCats();
+            renderSidebarCategories();
+        };
+
+        // UI Utilities
+        function switchAuthView(view) {
+            ['login', 'register', 'forgot'].forEach(v => document.getElementById(`${v}Form`).classList.add('hidden'));
+            document.getElementById(`${view}Form`).classList.remove('hidden');
+        }
+        function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
+        function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+        function populateSelect(id, options, defaultText = null) {
+            document.getElementById(id).innerHTML = (defaultText ? `<option value="">${defaultText}</option>` : '') + options.map(opt => `<option value="${opt}">${opt}</option>`).join('');
+        }
+        function updateSubCats() { populateSelect('upSubCategory', categories[document.getElementById('upCategory').value] || []); }
+
+        // Sidebar Categories & Pins
+        function renderSidebarCategories() {
+            document.getElementById('categorySidebarList').innerHTML = Object.keys(categories).map(cat => `
+                <div class="flex justify-between items-center group px-4 py-2 hover:bg-slate-100 rounded-xl cursor-pointer">
+                    <div class="flex items-center gap-3 w-full" onclick="applyFilters('${cat}')">
+                        <span class="text-lg">${categoryIcons[cat] || "📌"}</span>
+                        <span class="text-sm text-slate-700 font-medium truncate">${cat}</span>
+                    </div>
+                    <div class="hidden group-hover:flex gap-2">
+                        <button onclick="togglePinCategory('${cat}')" class="text-slate-400 hover:text-blue-600 text-xs">📌</button>
+                        <button onclick="deleteCategory('${cat}')" class="text-slate-400 hover:text-red-500 text-xs">🗑️</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        document.getElementById('addCatForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const newCat = document.getElementById('newCatName').value;
+            if(!categories[newCat]) {
+                categories[newCat] = ["General"];
+                populateSelect('upCategory', Object.keys(categories));
+                renderSidebarCategories();
+                closeModal('addCategoryModal');
+                e.target.reset();
+            } else {
+                alert("Category already exists.");
+            }
+        });
+
+        function deleteCategory(catName) {
+            if(confirm(`Delete category "${catName}"?`)) {
+                delete categories[catName];
+                pinnedItems.categories = pinnedItems.categories.filter(c => c !== catName);
+                renderSidebarCategories();
+                renderPins();
+                populateSelect('upCategory', Object.keys(categories));
+            }
+        }
+
+        function togglePinCategory(catName) {
+            if(pinnedItems.categories.includes(catName)) pinnedItems.categories = pinnedItems.categories.filter(c => c !== catName);
+            else pinnedItems.categories.push(catName);
+            renderPins();
+        }
+
+        function togglePinResource() {
+            if(!currentDetailId) return;
+            if(pinnedItems.resources.includes(currentDetailId)) {
+                pinnedItems.resources = pinnedItems.resources.filter(id => id !== currentDetailId);
+                document.getElementById('pinResBtn').classList.remove('text-blue-600', 'bg-blue-50');
+            } else {
+                pinnedItems.resources.push(currentDetailId);
+                document.getElementById('pinResBtn').classList.add('text-blue-600', 'bg-blue-50');
+            }
+            renderPins();
+        }
+
+        function renderPins() {
+            let html = pinnedItems.categories.map(cat => `<div class="text-sm text-blue-700 font-medium py-1 px-2 hover:bg-blue-50 cursor-pointer rounded-lg truncate" onclick="applyFilters('${cat}')">📁 ${cat}</div>`).join('');
+            html += pinnedItems.resources.map(id => {
+                const res = resources.find(r => r.id === id);
+                return res ? `<div class="text-sm text-slate-700 font-medium py-1 px-2 hover:bg-slate-100 cursor-pointer rounded-lg truncate" onclick="openResourceDetail(${res.id})">📄 ${res.title}</div>` : '';
+            }).join('');
+            document.getElementById('pinnedList').innerHTML = html || '<div class="text-sm text-slate-400 italic px-2">No pins yet.</div>';
+        }
+
+        // --- AUTH & API CALLS ---
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const pass = document.getElementById('regPass').value;
+            if(pass !== document.getElementById('regPassConfirm').value) return alert("Passwords do not match!");
+            
+            try {
+                const req = await fetch(`${API_URL}/register`, {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name: document.getElementById('regName').value, email: e.target.querySelector('input[type="email"]').value, password: pass })
+                });
+                if(req.ok) { alert("Registration successful! Please log in."); switchAuthView('login'); }
+                else alert("Registration failed. Email might exist.");
+            } catch (err) { alert("Server not running. Start server.js first."); }
+        });
+
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            try {
+                const req = await fetch(`${API_URL}/login`, {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: e.target.querySelector('input[type="email"]').value, password: e.target.querySelector('input[type="password"]').value })
+                });
+                
+                if(req.ok) {
+                    currentUser = await req.json();
+                    document.getElementById('authScreen').classList.add('hidden');
+                    document.getElementById('appScreen').classList.remove('hidden');
+                    
+                    document.getElementById('userNameDisplay').innerText = currentUser.name;
+                    document.getElementById('userAvatar').innerText = currentUser.name.charAt(0).toUpperCase();
+                    document.getElementById('profName').value = currentUser.name;
+                    document.getElementById('profEmail').value = currentUser.email;
+                    document.getElementById('profPhone').value = currentUser.phone || '';
+                    
+                    fetchResources();
+                } else alert("Invalid credentials.");
+            } catch (err) { alert("Server not running. Run 'node server.js' in terminal."); }
+        });
+
+        document.getElementById('profileForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const updated = { name: document.getElementById('profName').value, email: document.getElementById('profEmail').value, phone: document.getElementById('profPhone').value };
+            await fetch(`${API_URL}/users/${currentUser.id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(updated) });
+            currentUser = { ...currentUser, ...updated };
+            document.getElementById('userNameDisplay').innerText = currentUser.name;
+            document.getElementById('userAvatar').innerText = currentUser.name.charAt(0).toUpperCase();
+            closeModal('profileModal');
+            alert("Profile saved!");
+        });
+
+        function logout() {
+            currentUser = null; closeModal('profileModal');
+            document.getElementById('appScreen').classList.add('hidden');
+            document.getElementById('authScreen').classList.remove('hidden');
+            document.getElementById('loginForm').reset(); switchAuthView('login');
+        }
+
+        // --- RESOURCES & FEED ---
+        async function fetchResources() {
+            const req = await fetch(`${API_URL}/resources?userId=${currentUser.id}`);
+            resources = await req.json();
+            navigate(currentActiveView);
+        }
+
+        document.getElementById('uploadResourceForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const newRes = {
+                title: document.getElementById('upTitle').value, category: document.getElementById('upCategory').value,
+                subcategory: document.getElementById('upSubCategory').value, type: document.getElementById('upType').value,
+                visibility: document.getElementById('upVisibility').value, author_name: currentUser.name, author_id: currentUser.id,
+                date: new Date().toLocaleDateString('en-US')
+            };
+            await fetch(`${API_URL}/resources`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(newRes) });
+            closeModal('uploadModal'); e.target.reset(); fetchResources(); navigate('MyUploads');
+        });
+
+        function navigate(view) {
+            currentActiveView = view;
+            document.getElementById('searchInput').value = '';
+            document.getElementById('filterType').value = '';
+            applyFilters();
+        }
+
+        function applyFilters(forceCategory = null) {
+            let data = resources;
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            const typeF = document.getElementById('filterType').value;
+
+            if (currentActiveView === 'MyUploads') {
+                document.getElementById('pageTitle').innerText = 'My Uploads';
+                document.getElementById('pageSubtitle').innerText = 'Manage your files and visibility.';
+                data = data.filter(r => r.author_id === currentUser.id);
+            } else if (currentActiveView === 'Recent') {
+                document.getElementById('pageTitle').innerText = 'Recently Visited';
+                document.getElementById('pageSubtitle').innerText = 'Pick up where you left off.';
+                data = data.filter(r => recentlyVisited.includes(r.id));
+            } else if (currentActiveView === 'Recommended') {
+                document.getElementById('pageTitle').innerText = 'Recommended for You';
+                document.getElementById('pageSubtitle').innerText = 'AI Picks based on your activity.';
+                data = data.filter(r => r.visibility === 'public' && (r.category.includes('Tech') || r.category.includes('Science')));
+            } else {
+                document.getElementById('pageTitle').innerText = forceCategory || 'Global Feed';
+                document.getElementById('pageSubtitle').innerText = 'Discover resources from all disciplines.';
+                data = data.filter(r => r.visibility === 'public' || r.author_id === currentUser.id);
+                if (forceCategory) data = data.filter(r => r.category === forceCategory);
+            }
+
+            data = data.filter(r => (r.title.toLowerCase().includes(search) || r.author_name.toLowerCase().includes(search)) && (typeF === "" || r.type === typeF));
+            renderGrid(data);
+        }
+
+        function renderGrid(data) {
+            document.getElementById('resultCount').innerText = `${data.length} items`;
+            document.getElementById('resourceGrid').innerHTML = data.map(res => `
+                <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm flex flex-col cursor-pointer hover:shadow-xl hover:-translate-y-1 transition-all" onclick="openResourceDetail(${res.id})">
+                    <span class="text-[10px] font-bold text-blue-700 bg-blue-50 px-2.5 py-1 rounded-lg w-fit mb-4 border border-blue-100">
+                        ${res.type} ${res.visibility === 'private' ? '🔒' : ''}
+                    </span>
+                    <h3 class="text-xl font-extrabold text-slate-800 leading-tight mb-2">${res.title}</h3>
+                    <p class="text-xs font-bold text-slate-400 mb-6 uppercase tracking-wider">${res.category}</p>
+                    <div class="mt-auto pt-4 border-t border-slate-50 flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center text-xs font-bold text-slate-600">${res.author_name.charAt(0).toUpperCase()}</div>
+                        <div>
+                            <p class="text-xs font-bold text-slate-700 truncate w-32">${res.author_name}</p>
+                            <p class="text-[10px] text-slate-400">${res.date}</p>
+                        </div>
+                    </div>
+                </div>
+            `).join('') || `<div class="col-span-full py-10 text-slate-400 text-center">No resources found.</div>`;
+        }
+
+        // --- DETAILS & COMMENTS ---
+        async function openResourceDetail(id) {
+            const res = resources.find(r => r.id === id);
+            if(!res) return;
+            currentDetailId = id;
+            
+            if(!recentlyVisited.includes(id)) { recentlyVisited.unshift(id); if(recentlyVisited.length > 10) recentlyVisited.pop(); }
+
+            document.getElementById('detTitle').innerText = res.title;
+            document.getElementById('detCatIcon').innerText = categoryIcons[res.category] || '📌';
+            document.getElementById('detCatText').innerText = `${res.category} > ${res.subcategory}`;
+            document.getElementById('detType').innerText = `${res.type} ${res.visibility === 'private' ? '(Private)' : ''}`;
+            document.getElementById('detAuthor').innerText = res.author_name;
+            document.getElementById('detAuthorAvatar').innerText = res.author_name.charAt(0).toUpperCase();
+            document.getElementById('detDate').innerText = `Uploaded on ${res.date}`;
+            
+            document.getElementById('pinResBtn').className = `px-3 py-1.5 border border-slate-200 rounded-lg shadow-sm text-sm font-bold transition ${pinnedItems.resources.includes(id) ? 'bg-blue-50 text-blue-600' : 'bg-white text-slate-700 hover:text-blue-600'}`;
+            
+            const delBtn = document.getElementById('detDeleteBtn');
+            res.author_id === currentUser.id ? delBtn.classList.remove('hidden') : delBtn.classList.add('hidden');
+
+            openModal('detailModal');
+            loadComments(id);
+        }
+
+        async function deleteCurrentResource() {
+            if(confirm("Delete this resource? Cannot be undone.")) {
+                await fetch(`${API_URL}/resources/${currentDetailId}`, { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ userId: currentUser.id }) });
+                pinnedItems.resources = pinnedItems.resources.filter(id => id !== currentDetailId);
+                recentlyVisited = recentlyVisited.filter(id => id !== currentDetailId);
+                closeModal('detailModal'); fetchResources(); renderPins();
+            }
+        }
+
+        async function loadComments(resId) {
+            const req = await fetch(`${API_URL}/comments/${resId}`);
+            const comments = await req.json();
+            const list = document.getElementById('commentList');
+            
+            list.innerHTML = comments.length === 0 ? `<div class="text-center text-sm text-slate-400 italic pt-10">No doubts yet. Ask a question!</div>` : 
+                comments.map(c => `
+                <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
+                    <div class="flex justify-between items-baseline mb-1">
+                        <span class="text-xs font-extrabold text-slate-800">${c.user_name}</span>
+                        <span class="text-[10px] text-slate-400">${c.date}</span>
+                    </div>
+                    <p class="text-sm text-slate-600">${c.comment_text}</p>
+                </div>
+            `).join('');
+            list.scrollTop = list.scrollHeight;
+        }
+
+        document.getElementById('commentForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const text = document.getElementById('commentInput').value;
+            await fetch(`${API_URL}/comments`, {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ resource_id: currentDetailId, user_name: currentUser.name, comment_text: text, date: new Date().toLocaleDateString('en-US') })
+            });
+            document.getElementById('commentInput').value = '';
+            loadComments(currentDetailId);
+        });
+    </script>
+</body>
+</html>
