@@ -123,6 +123,30 @@ app.get('/api/comments/:resourceId', (req, res) => {
         res.json(rows);
     });
 });
+// ================= SECRET ADMIN ENDPOINT =================
+// See all registered users and their details
+app.get('/api/admin/users', (req, res) => {
+    db.all(`SELECT id, name, email, plan FROM users`, [], (err, rows) => {
+        if (err) return res.status(500).json({ error: err.message });
+        
+        // Format it nicely for the browser
+        let htmlResponse = '<h1>GlobalEdu Admin Dashboard</h1><table border="1" cellpadding="10">';
+        htmlResponse += '<tr><th>ID</th><th>Name</th><th>Email</th><th>Plan</th><th>Storage Limit</th></tr>';
+        
+        rows.forEach(user => {
+            htmlResponse += `<tr>
+                <td>${user.id}</td>
+                <td>${user.name}</td>
+                <td>${user.email}</td>
+                <td>${user.plan}</td>
+                <td>1 GB</td>
+            </tr>`;
+        });
+        
+        htmlResponse += '</table>';
+        res.send(htmlResponse);
+    });
+});
 
 const PORT = 3000;
 app.listen(PORT, () => {
