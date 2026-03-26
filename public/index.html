@@ -279,25 +279,30 @@
 
         // Sidebar Categories & Pins
         function renderSidebarCategories() {
-            document.getElementById('categorySidebarList').innerHTML = Object.keys(categories).map(cat => `
+            document.getElementById('categorySidebarList').innerHTML = Object.keys(categories).map(cat => {
+                const isPinned = pinnedItems.categories.includes(cat);
+                const pinClass = isPinned ? "text-blue-600" : "text-slate-400 hover:text-blue-600";
+                return `
                 <div class="flex justify-between items-center group px-4 py-2 hover:bg-slate-100 rounded-xl cursor-pointer">
-                    <div class="flex items-center gap-3 w-full" onclick="applyFilters('${cat}')">
+                    <div class="flex items-center gap-3 w-full overflow-hidden" onclick="applyFilters('${cat}')">
                         <span class="text-lg">${categoryIcons[cat] || "📌"}</span>
                         <span class="text-sm text-slate-700 font-medium truncate">${cat}</span>
                     </div>
                     <div class="hidden group-hover:flex gap-2">
-                        <button onclick="togglePinCategory('${cat}')" class="text-slate-400 hover:text-blue-600 text-xs">📌</button>
-                        <button onclick="deleteCategory('${cat}')" class="text-slate-400 hover:text-red-500 text-xs">🗑️</button>
+                        <button onclick="togglePinCategory(event, '${cat}')" class="${pinClass} text-xs">📌</button>
+                        <button onclick="deleteCategory(event, '${cat}')" class="text-slate-400 hover:text-red-500 text-xs">🗑️</button>
                     </div>
                 </div>
-            `).join('');
+            `}).join('');
         }
 
         document.getElementById('addCatForm').addEventListener('submit', (e) => {
             e.preventDefault();
             const newCat = document.getElementById('newCatName').value;
+            const newIcon = document.getElementById('newCatIcon').value;
             if(!categories[newCat]) {
                 categories[newCat] = ["General"];
+                categoryIcons[newCat] = newIcon; // Stores the chosen icon
                 populateSelect('upCategory', Object.keys(categories));
                 renderSidebarCategories();
                 closeModal('addCategoryModal');
@@ -307,7 +312,8 @@
             }
         });
 
-        function deleteCategory(catName) {
+        function deleteCategory(event, catName) {
+            event.stopPropagation();
             if(confirm(`Delete category "${catName}"?`)) {
                 delete categories[catName];
                 pinnedItems.categories = pinnedItems.categories.filter(c => c !== catName);
@@ -317,10 +323,15 @@
             }
         }
 
-        function togglePinCategory(catName) {
-            if(pinnedItems.categories.includes(catName)) pinnedItems.categories = pinnedItems.categories.filter(c => c !== catName);
-            else pinnedItems.categories.push(catName);
+        function togglePinCategory(event, catName) {
+            event.stopPropagation(); // Prevents triggering the category filter when clicking the pin
+            if(pinnedItems.categories.includes(catName)) {
+                pinnedItems.categories = pinnedItems.categories.filter(c => c !== catName);
+            } else {
+                pinnedItems.categories.push(catName);
+            }
             renderPins();
+            renderSidebarCategories(); // Re-renders to show the pin turn blue
         }
 
         function togglePinResource() {
