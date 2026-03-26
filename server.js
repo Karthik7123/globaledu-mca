@@ -124,26 +124,109 @@ app.get('/api/comments/:resourceId', (req, res) => {
     });
 });
 // ================= SECRET ADMIN ENDPOINT =================
-// See all registered users and their details
+// See all registered users with an attractive, interactive UI
 app.get('/api/admin/users', (req, res) => {
     db.all(`SELECT id, name, email, plan FROM users`, [], (err, rows) => {
         if (err) return res.status(500).json({ error: err.message });
         
-        // Format it nicely for the browser
-        let htmlResponse = '<h1>GlobalEdu Admin Dashboard</h1><table border="1" cellpadding="10">';
-        htmlResponse += '<tr><th>ID</th><th>Name</th><th>Email</th><th>Plan</th><th>Storage Limit</th></tr>';
-        
+        let htmlResponse = `
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>GlobalEdu | Admin Dashboard</title>
+            <script src="https://cdn.tailwindcss.com"></script>
+            <style>
+                body { font-family: sans-serif; background-color: #f8fafc; color: #0f172a; }
+                .brand-gradient { background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%); }
+            </style>
+        </head>
+        <body class="p-8 md:p-12">
+            <div class="max-w-6xl mx-auto">
+                
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+                    <div>
+                        <h1 class="text-3xl font-black text-slate-800 tracking-tight">Admin Dashboard</h1>
+                        <p class="text-slate-500 font-medium mt-1">Manage your GlobalEdu users and platform data.</p>
+                    </div>
+                    <div class="bg-blue-100 text-blue-800 px-5 py-2.5 rounded-xl font-extrabold text-sm shadow-sm flex items-center gap-2">
+                        <span>👥 Total Registered Users:</span>
+                        <span class="bg-blue-600 text-white px-2 py-0.5 rounded-lg">${rows.length}</span>
+                    </div>
+                </div>
+
+                <div class="mb-6">
+                    <input type="text" id="searchInput" onkeyup="searchTable()" placeholder="🔍 Search by name or email..." 
+                           class="w-full md:w-1/3 p-3.5 bg-white border border-slate-200 rounded-xl shadow-sm outline-none focus:ring-2 focus:ring-blue-500 transition font-medium text-sm">
+                </div>
+
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                    <table class="w-full text-left border-collapse" id="userTable">
+                        <thead>
+                            <tr class="bg-slate-50 text-slate-500 text-xs uppercase tracking-wider border-b border-slate-200">
+                                <th class="p-5 font-bold">User ID</th>
+                                <th class="p-5 font-bold">Full Name</th>
+                                <th class="p-5 font-bold">Email Address</th>
+                                <th class="p-5 font-bold">Subscription Plan</th>
+                                <th class="p-5 font-bold">Storage Limit</th>
+                            </tr>
+                        </thead>
+                        <tbody class="text-sm">
+        `;
+
+        // Loop through the database rows and create table rows
         rows.forEach(user => {
-            htmlResponse += `<tr>
-                <td>${user.id}</td>
-                <td>${user.name}</td>
-                <td>${user.email}</td>
-                <td>${user.plan}</td>
-                <td>1 GB</td>
-            </tr>`;
+            // Create a nice visual badge for the subscription plan
+            const planBadge = user.plan === 'Pro' 
+                ? '<span class="bg-purple-100 text-purple-700 px-3 py-1 rounded-md font-bold text-xs border border-purple-200">Pro</span>' 
+                : '<span class="bg-slate-100 text-slate-600 px-3 py-1 rounded-md font-bold text-xs border border-slate-200">Free</span>';
+
+            htmlResponse += `
+                            <tr class="hover:bg-slate-50 transition border-b border-slate-100 last:border-0">
+                                <td class="p-5 font-bold text-slate-400">#${user.id}</td>
+                                <td class="p-5 font-extrabold text-slate-800">${user.name}</td>
+                                <td class="p-5 text-slate-600 font-medium">${user.email}</td>
+                                <td class="p-5">${planBadge}</td>
+                                <td class="p-5 text-slate-500 font-medium">1 GB</td>
+                            </tr>
+            `;
         });
-        
-        htmlResponse += '</table>';
+
+        htmlResponse += `
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <script>
+                function searchTable() {
+                    const input = document.getElementById("searchInput");
+                    const filter = input.value.toLowerCase();
+                    const table = document.getElementById("userTable");
+                    const tr = table.getElementsByTagName("tr");
+
+                    for (let i = 1; i < tr.length; i++) {
+                        const tdName = tr[i].getElementsByTagName("td")[1];
+                        const tdEmail = tr[i].getElementsByTagName("td")[2];
+                        
+                        if (tdName || tdEmail) {
+                            const nameValue = tdName.textContent || tdName.innerText;
+                            const emailValue = tdEmail.textContent || tdEmail.innerText;
+                            
+                            if (nameValue.toLowerCase().indexOf(filter) > -1 || emailValue.toLowerCase().indexOf(filter) > -1) {
+                                tr[i].style.display = "";
+                            } else {
+                                tr[i].style.display = "none";
+                            }
+                        }
+                    }
+                }
+            </script>
+        </body>
+        </html>
+        `;
+
         res.send(htmlResponse);
     });
 });
