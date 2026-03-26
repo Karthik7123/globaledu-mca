@@ -2,6 +2,7 @@ const express = require('express');
 const { Pool } = require('pg');
 const cors = require('cors');
 const path = require('path');
+const nodemailer = require('nodemailer');
 
 const app = express();
 app.use(cors());
@@ -11,7 +12,6 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
 // ================= CLOUD DATABASE CONNECTION =================
-// Using Environment Variables for strict security
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
     ssl: { rejectUnauthorized: false }
@@ -41,10 +41,29 @@ const initDB = async () => {
 };
 initDB();
 
+// ================= EMAIL & OTP SETUP =================
+const otpStorage = new Map(); // Temporarily stores email -> code
+
+const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS
+    }
+});
+
 // ================= API ENDPOINTS =================
 
+// Register with strict password validation
 app.post('/api/register', async (req, res) => {
     const { name, email, password } = req.body;
+    
+    // Min 8 chars, 1 letter, 1 number, 1 special char
+    const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/;
+    if (!passwordRegex.test(password)) {
+        return res.status(400).json({ error: "Password must be at least 8 characters, with 1 letter, 1 number, and 1 special character." });
+    }
+
     try {
         const result = await pool.query(
             `INSERT INTO users (name, email, password) VALUES ($1, $2, $3) RETURNING id, name, email`, 
@@ -56,6 +75,7 @@ app.post('/api/register', async (req, res) => {
     }
 });
 
+// Login
 app.post('/api/login', async (req, res) => {
     const { email, password } = req.body;
     try {
@@ -70,6 +90,55 @@ app.post('/api/login', async (req, res) => {
     }
 });
 
+// Forgot Password - Send OTP
+app.post('/api/forgot-password', async (req, res) => {
+    const { email } = req.body;
+    try {
+        const userCheck = await pool.query(`SELECT id FROM users WHERE email = $1`, [email]);
+        if (userCheck.rows.length === 0) return res.status(404).json({ error: "Email not found" });
+
+        const code = Math.floor(100000 + Math.random() * 900000).toString();
+        otpStorage.set(email, code);
+
+        const mailOptions = {
+            from: process.env.EMAIL_USER,
+            to: email,
+            subject: 'GlobalEdu - Password Reset Code',
+            text: `Your password reset code is: ${code}. Do not share this with anyone.`
+        };
+
+        await transporter.sendMail(mailOptions);
+        res.json({ success: true, message: "Code sent successfully" });
+    } catch (err) {
+        console.error("Email Error:", err);
+        res.status(500).json({ error: "Failed to send email. Check server configuration." });
+    }
+});
+
+// Reset Password - Verify OTP
+app.post('/api/reset-password', async (req, res) => {
+    const { email, code, newPassword } = req.body;
+    
+    const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/;
+    if (!passwordRegex.test(newPassword)) {
+        return res.status(400).json({ error: "Password does not meet complexity requirements." });
+    }
+
+    const savedCode = otpStorage.get(email);
+    if (!savedCode || savedCode !== code) {
+        return res.status(400).json({ error: "Invalid or expired code." });
+    }
+
+    try {
+        await pool.query(`UPDATE users SET password = $1 WHERE email = $2`, [newPassword, email]);
+        otpStorage.delete(email);
+        res.json({ success: true, message: "Password updated successfully" });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Update Profile
 app.put('/api/users/:id', async (req, res) => {
     const { name, email, phone } = req.body;
     try {
@@ -83,6 +152,7 @@ app.put('/api/users/:id', async (req, res) => {
     }
 });
 
+// Get Resources
 app.get('/api/resources', async (req, res) => {
     const userId = req.query.userId;
     try {
@@ -96,6 +166,7 @@ app.get('/api/resources', async (req, res) => {
     }
 });
 
+// Upload Resource
 app.post('/api/resources', async (req, res) => {
     const { title, category, subcategory, type, visibility, author_name, author_id, date } = req.body;
     try {
@@ -110,6 +181,7 @@ app.post('/api/resources', async (req, res) => {
     }
 });
 
+// Delete Resource
 app.delete('/api/resources/:id', async (req, res) => {
     const { userId } = req.body;
     try {
@@ -123,6 +195,7 @@ app.delete('/api/resources/:id', async (req, res) => {
     }
 });
 
+// Post Comment
 app.post('/api/comments', async (req, res) => {
     const { resource_id, user_name, comment_text, date } = req.body;
     try {
@@ -136,6 +209,7 @@ app.post('/api/comments', async (req, res) => {
     }
 });
 
+// Get Comments
 app.get('/api/comments/:resourceId', async (req, res) => {
     try {
         const result = await pool.query(

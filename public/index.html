@@ -37,7 +37,7 @@
                 <h2 class="text-xl font-bold mb-4">Create Account</h2>
                 <input type="text" id="regName" placeholder="Full Name" required class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none">
                 <input type="email" placeholder="Email Address" required class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none">
-                <input type="password" id="regPass" placeholder="Create Password" required class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none">
+                <input type="password" id="regPass" placeholder="Password (Min 8 chars, 1 num, 1 special)" required class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none">
                 <input type="password" id="regPassConfirm" placeholder="Confirm Password" required class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none">
                 <button type="submit" class="w-full py-3 brand-gradient text-white font-bold rounded-xl shadow-lg">Register</button>
                 <p class="text-center text-sm text-slate-500 mt-4"><a href="#" onclick="switchAuthView('login')" class="text-blue-600 font-bold hover:underline">Back to Login</a></p>
@@ -48,11 +48,11 @@
                 <p class="text-xs text-slate-500 mb-4">Enter your email to receive a verification code.</p>
                 <input type="email" placeholder="Email Address" required class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none">
                 <div id="verifySection" class="hidden space-y-4">
-                    <input type="text" placeholder="Enter 6-digit Code" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none">
-                    <input type="password" placeholder="New Password" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none">
-                    <button type="button" onclick="alert('Password Reset Successful!'); switchAuthView('login')" class="w-full py-3 bg-green-600 text-white font-bold rounded-xl shadow-lg">Confirm Reset</button>
+                    <input type="text" id="verifyCodeInput" placeholder="Enter 6-digit Code" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none">
+                    <input type="password" id="newPasswordInput" placeholder="New Password" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none">
+                    <button type="button" id="confirmResetBtn" class="w-full py-3 bg-green-600 text-white font-bold rounded-xl shadow-lg">Confirm Reset</button>
                 </div>
-                <button type="button" onclick="document.getElementById('verifySection').classList.remove('hidden'); this.classList.add('hidden');" class="w-full py-3 bg-slate-800 text-white font-bold rounded-xl shadow-lg">Send Verification Code</button>
+                <button type="button" id="sendCodeBtn" class="w-full py-3 bg-slate-800 text-white font-bold rounded-xl shadow-lg">Send Verification Code</button>
                 <p class="text-center text-sm text-slate-500 mt-4"><a href="#" onclick="switchAuthView('login')" class="text-blue-600 font-bold hover:underline">Back to Login</a></p>
             </form>
         </div>
@@ -145,12 +145,14 @@
                         <option value="private">🔒 Private (Only me)</option>
                     </select>
                 </div>
+                
                 <input type="file" id="upFile" class="hidden" accept=".pdf,.mp4,.docx,.txt" onchange="document.getElementById('fileNameDisplay').innerText = this.files[0] ? this.files[0].name : 'Click to browse or drag file here'">
-<div onclick="document.getElementById('upFile').click()" class="border-2 border-dashed border-slate-300 rounded-2xl p-10 text-center bg-slate-50 cursor-pointer hover:bg-slate-100 transition">
-    <span class="text-4xl mb-2 block">📁</span>
-    <p id="fileNameDisplay" class="text-slate-600 font-bold truncate">Click to browse or drag file here</p>
-    <p class="text-xs text-slate-400 mt-1">Max size: 100MB (PDF, MP4, DOCX)</p>
-</div>
+                <div onclick="document.getElementById('upFile').click()" class="border-2 border-dashed border-slate-300 rounded-2xl p-10 text-center bg-slate-50 cursor-pointer hover:bg-slate-100 transition">
+                    <span class="text-4xl mb-2 block">📁</span>
+                    <p id="fileNameDisplay" class="text-slate-600 font-bold truncate">Click to browse or drag file here</p>
+                    <p class="text-xs text-slate-400 mt-1">Max size: 100MB (PDF, MP4, DOCX)</p>
+                </div>
+
                 <button type="submit" class="w-full py-4 brand-gradient text-white font-bold rounded-xl shadow-lg mt-4 text-lg">Publish Resource</button>
             </form>
         </div>
@@ -222,17 +224,17 @@
         <div class="bg-white rounded-3xl w-full max-w-sm p-8 shadow-2xl">
             <h3 class="text-xl font-extrabold text-slate-800 mb-6">Add Custom Subject</h3>
             <form id="addCatForm" class="space-y-4">
-    <div class="flex gap-3">
-        <select id="newCatIcon" class="w-24 p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none text-xl cursor-pointer">
-            <option value="📌">📌</option><option value="💡">💡</option>
-            <option value="💻">💻</option><option value="📊">📊</option>
-            <option value="🔬">🔬</option><option value="🎨">🎨</option>
-            <option value="🛠️">🛠️</option><option value="🌍">🌍</option>
-            <option value="📚">📚</option><option value="⚕️">⚕️</option>
-        </select>
-        <input type="text" id="newCatName" required placeholder="Subject Name" class="flex-1 p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none">
-    </div>
-    <div class="pt-2 flex gap-3">
+                <div class="flex gap-3">
+                    <select id="newCatIcon" class="w-24 p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none text-xl cursor-pointer">
+                        <option value="📌">📌</option><option value="💡">💡</option>
+                        <option value="💻">💻</option><option value="📊">📊</option>
+                        <option value="🔬">🔬</option><option value="🎨">🎨</option>
+                        <option value="🛠️">🛠️</option><option value="🌍">🌍</option>
+                        <option value="📚">📚</option><option value="⚕️">⚕️</option>
+                    </select>
+                    <input type="text" id="newCatName" required placeholder="Subject Name" class="flex-1 p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none">
+                </div>
+                <div class="pt-2 flex gap-3">
                     <button type="button" onclick="closeModal('addCategoryModal')" class="flex-1 py-3 bg-slate-100 text-slate-700 font-bold rounded-xl">Cancel</button>
                     <button type="submit" class="flex-1 py-3 bg-blue-600 text-white font-bold rounded-xl shadow-md">Add</button>
                 </div>
@@ -241,6 +243,7 @@
     </div>
 
     <script>
+        // Set to relative path so it works everywhere
         const API_URL = '/api';
         
         // State
@@ -302,7 +305,7 @@
             const newIcon = document.getElementById('newCatIcon').value;
             if(!categories[newCat]) {
                 categories[newCat] = ["General"];
-                categoryIcons[newCat] = newIcon; // Stores the chosen icon
+                categoryIcons[newCat] = newIcon;
                 populateSelect('upCategory', Object.keys(categories));
                 renderSidebarCategories();
                 closeModal('addCategoryModal');
@@ -324,14 +327,14 @@
         }
 
         function togglePinCategory(event, catName) {
-            event.stopPropagation(); // Prevents triggering the category filter when clicking the pin
+            event.stopPropagation();
             if(pinnedItems.categories.includes(catName)) {
                 pinnedItems.categories = pinnedItems.categories.filter(c => c !== catName);
             } else {
                 pinnedItems.categories.push(catName);
             }
             renderPins();
-            renderSidebarCategories(); // Re-renders to show the pin turn blue
+            renderSidebarCategories();
         }
 
         function togglePinResource() {
@@ -366,11 +369,66 @@
                     method: 'POST', headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ name: document.getElementById('regName').value, email: e.target.querySelector('input[type="email"]').value, password: pass })
                 });
-                if(req.ok) { alert("Registration successful! Please log in."); switchAuthView('login'); }
-                else alert("Registration failed. Email might exist.");
-            } catch (err) { alert("Server not running. Start server.js first."); }
+                if(req.ok) { 
+                    alert("Registration successful! Please log in."); 
+                    switchAuthView('login'); 
+                } else {
+                    const errorData = await req.json();
+                    alert("Registration failed: " + (errorData.error || "Email might exist."));
+                }
+            } catch (err) { alert("Server error."); }
         });
 
+        // FORGOT PASSWORD FLOW
+        let resetEmail = "";
+
+        document.getElementById('sendCodeBtn').addEventListener('click', async () => {
+            resetEmail = document.getElementById('forgotForm').querySelector('input[type="email"]').value;
+            if(!resetEmail) return alert("Please enter your email first.");
+            
+            try {
+                const req = await fetch(`${API_URL}/forgot-password`, {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: resetEmail })
+                });
+                
+                const res = await req.json();
+                if(req.ok) {
+                    alert("A 6-digit code has been sent to your email!");
+                    document.getElementById('verifySection').classList.remove('hidden');
+                    document.getElementById('sendCodeBtn').classList.add('hidden');
+                } else {
+                    alert(res.error || "Failed to send code.");
+                }
+            } catch (err) { alert("Server error."); }
+        });
+
+        document.getElementById('confirmResetBtn').addEventListener('click', async () => {
+            const code = document.getElementById('verifyCodeInput').value;
+            const newPassword = document.getElementById('newPasswordInput').value;
+            
+            if(!code || !newPassword) return alert("Please fill in both the code and the new password.");
+
+            try {
+                const req = await fetch(`${API_URL}/reset-password`, {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: resetEmail, code: code, newPassword: newPassword })
+                });
+                
+                const res = await req.json();
+                if(req.ok) {
+                    alert("Password Reset Successful! You can now log in.");
+                    document.getElementById('forgotForm').reset();
+                    document.getElementById('verifySection').classList.add('hidden');
+                    document.getElementById('sendCodeBtn').classList.remove('hidden');
+                    switchAuthView('login');
+                } else {
+                    alert(res.error || "Failed to reset password.");
+                }
+            } catch (err) { alert("Server error."); }
+        });
+
+        // LOGIN FLOW
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             try {
@@ -392,7 +450,7 @@
                     
                     fetchResources();
                 } else alert("Invalid credentials.");
-            } catch (err) { alert("Server not running. Run 'node server.js' in terminal."); }
+            } catch (err) { alert("Server error."); }
         });
 
         document.getElementById('profileForm').addEventListener('submit', async (e) => {
@@ -429,7 +487,11 @@
                 date: new Date().toLocaleDateString('en-US')
             };
             await fetch(`${API_URL}/resources`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(newRes) });
-            closeModal('uploadModal'); e.target.reset(); fetchResources(); navigate('MyUploads');
+            closeModal('uploadModal'); 
+            e.target.reset(); 
+            document.getElementById('fileNameDisplay').innerText = 'Click to browse or drag file here';
+            fetchResources(); 
+            navigate('MyUploads');
         });
 
         function navigate(view) {
