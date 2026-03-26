@@ -145,10 +145,12 @@
                         <option value="private">🔒 Private (Only me)</option>
                     </select>
                 </div>
-                <div class="border-2 border-dashed border-slate-300 rounded-2xl p-10 text-center bg-slate-50 cursor-pointer hover:bg-slate-100 transition">
-                    <p class="text-slate-600 font-bold">Click to browse or drag file here</p>
-                    <p class="text-xs text-slate-400 mt-1">Max size: 100MB (PDF, MP4, DOCX)</p>
-                </div>
+                <input type="file" id="upFile" class="hidden" accept=".pdf,.mp4,.docx,.txt" onchange="document.getElementById('fileNameDisplay').innerText = this.files[0] ? this.files[0].name : 'Click to browse or drag file here'">
+<div onclick="document.getElementById('upFile').click()" class="border-2 border-dashed border-slate-300 rounded-2xl p-10 text-center bg-slate-50 cursor-pointer hover:bg-slate-100 transition">
+    <span class="text-4xl mb-2 block">📁</span>
+    <p id="fileNameDisplay" class="text-slate-600 font-bold truncate">Click to browse or drag file here</p>
+    <p class="text-xs text-slate-400 mt-1">Max size: 100MB (PDF, MP4, DOCX)</p>
+</div>
                 <button type="submit" class="w-full py-4 brand-gradient text-white font-bold rounded-xl shadow-lg mt-4 text-lg">Publish Resource</button>
             </form>
         </div>
@@ -220,8 +222,17 @@
         <div class="bg-white rounded-3xl w-full max-w-sm p-8 shadow-2xl">
             <h3 class="text-xl font-extrabold text-slate-800 mb-6">Add Custom Subject</h3>
             <form id="addCatForm" class="space-y-4">
-                <input type="text" id="newCatName" required placeholder="Subject Name" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none">
-                <div class="pt-2 flex gap-3">
+    <div class="flex gap-3">
+        <select id="newCatIcon" class="w-24 p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none text-xl cursor-pointer">
+            <option value="📌">📌</option><option value="💡">💡</option>
+            <option value="💻">💻</option><option value="📊">📊</option>
+            <option value="🔬">🔬</option><option value="🎨">🎨</option>
+            <option value="🛠️">🛠️</option><option value="🌍">🌍</option>
+            <option value="📚">📚</option><option value="⚕️">⚕️</option>
+        </select>
+        <input type="text" id="newCatName" required placeholder="Subject Name" class="flex-1 p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none">
+    </div>
+    <div class="pt-2 flex gap-3">
                     <button type="button" onclick="closeModal('addCategoryModal')" class="flex-1 py-3 bg-slate-100 text-slate-700 font-bold rounded-xl">Cancel</button>
                     <button type="submit" class="flex-1 py-3 bg-blue-600 text-white font-bold rounded-xl shadow-md">Add</button>
                 </div>
